@@ -27,8 +27,8 @@ static int32_t convert_multi_channels(img_info_t &new_img,
 
 static int32_t resize_nearest(img_info_t &new_img, img_info_t &old_img)
 {
-    int32_t scale_w = old_img.width / new_img.width;
-    int32_t scale_h = old_img.height / new_img.height;
+    float scale_w = (float)(old_img.width) / (float)new_img.width;
+    float scale_h = (float)(old_img.height) / (float)new_img.height;
 
     int32_t new_width = new_img.width;
     int32_t old_width = old_img.width;
@@ -37,11 +37,11 @@ static int32_t resize_nearest(img_info_t &new_img, img_info_t &old_img)
         for (int32_t i = 0; i < new_img.width; i++)
         {
             new_img.img_addr[i + j * new_width] = *(old_img.img_addr +
-                                                    scale_w * i +
-                                                    (j * scale_h) * old_width);
+                                                    (int32_t)(scale_w * i) +
+                                                    ((int32_t)(j * scale_h)) * old_width);
             uint8_t char_idx = *(old_img.img_addr +
-                                 scale_w * i +
-                                 (j * scale_h) * old_width);
+                                 ((int32_t)(scale_w * i)) +
+                                 ((int32_t)(j * scale_h)) * old_width);
         }
     }
 
@@ -103,8 +103,8 @@ int32_t resize_test_opencv()
     old_img.width = gray_img.cols;
     old_img.height = gray_img.rows;
     old_img.img_addr = new uint8_t[old_img.width * old_img.height];
-    new_img.width = 200;
-    new_img.height = 200;
+    new_img.width = 300;
+    new_img.height = 300;
     new_img.img_addr = new uint8_t[new_img.width * new_img.height];
     split(img, origin_mat);
     for (int32_t i = 0; i < channel_num; i++)
