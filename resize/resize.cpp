@@ -1,8 +1,8 @@
 #include "resize.h"
 #include <iostream>
-#include <opencv2/core.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/opencv.hpp>
+#include <string>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -18,7 +18,12 @@ typedef struct
 } img_info_t;
 typedef int32_t (*resize_kernel_t)(img_info_t &, img_info_t &);
 
+const int32_t channel_num = 3;
+
 static int32_t resize_nearest(img_info_t &new_img, img_info_t &old_img);
+static int32_t convert_multi_channels(img_info_t &new_img,
+                                      img_info_t &old_img,
+                                      Mat origin_mat);
 
 static int32_t resize_nearest(img_info_t &new_img, img_info_t &old_img)
 {
@@ -37,9 +42,18 @@ static int32_t resize_nearest(img_info_t &new_img, img_info_t &old_img)
             uint8_t char_idx = *(old_img.img_addr +
                                  scale_w * i +
                                  (j * scale_h) * old_width);
-            printf("%d \r\n", new_img.img_addr[i + j * new_width]);
         }
     }
+
+    return 0;
+}
+
+static int32_t convert_multi_channels(img_info_t &new_img,
+                                      img_info_t &old_img,
+                                      Mat origin_mat)
+{
+
+    memcpy(old_img.img_addr, origin_mat.data, origin_mat.cols * origin_mat.rows);
 
     return 0;
 }
@@ -55,7 +69,7 @@ int32_t resize_test()
     new_img.img_addr = new uint8_t[new_img.width * new_img.height];
     old_img.width = 12;
     old_img.height = 8;
-    old_img.img_addr = new uint8_t[new_img.width * new_img.height];
+    old_img.img_addr = new uint8_t[old_img.width * old_img.height];
     for (int32_t idx = 0; idx < old_img.width * old_img.height; idx++)
     {
         old_img.img_addr[idx] = idx;
@@ -70,16 +84,44 @@ int32_t resize_test()
 
 int32_t resize_test_opencv()
 {
-    Mat img, dst_img;
     const string file_name = "./lena.jpg";
     img_info_t new_img, old_img;
+    Mat img, gray_img, dst_img;
+    resize_kernel_t resize_kernel = 0;
+    vector<cv::Mat> origin_mat, new_mat;
 
+    resize_kernel = resize_nearest;
     img = imread(file_name);
-    cvtColor(img, dst_img, CV_BGR2GRAY);
-    namedWindow("Display window", WINDOW_AUTOSIZE);
-    imshow("Display window", dst_img);
+    cvtColor(img, gray_img, CV_BGR2GRAY);
+    //    split(img, g_img);
+    //    split(img, r_img);
+#if 0
+    old_img.width = gray_img.cols;
+    old_img.height = gray_img.rows;
+    old_img.img_addr = new uint8_t[old_img.width * old_img.height];
+#endif
+    old_img.width = gray_img.cols;
+    old_img.height = gray_img.rows;
+    old_img.img_addr = new uint8_t[old_img.width * old_img.height];
+    new_img.width = 200;
+    new_img.height = 200;
+    new_img.img_addr = new uint8_t[new_img.width * new_img.height];
+    split(img, origin_mat);
+    for (int32_t i = 0; i < channel_num; i++)
+    {
+        convert_multi_channels(new_img,
+                               old_img,
+                               origin_mat[i]);
+        resize_kernel(new_img, old_img);
 
-    old_img.width = dst_img.cols;
+        new_mat.push_back(Mat(new_img.height, new_img.width, CV_8UC1, new_img.img_addr).clone());
+        // new_mat[i] = Mat(new_img.height, new_img.width, CV_8UC1, new_img.img_addr).clone();
+    }
+    merge(new_mat, dst_img);
+    namedWindow("Display window", WINDOW_AUTOSIZE);
+    namedWindow("converted Display", WINDOW_AUTOSIZE);
+    imshow("Display window", gray_img);
+    imshow("converted Display", dst_img);
 
     cvWaitKey(0);
 
