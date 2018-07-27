@@ -71,12 +71,16 @@ int32_t resize_test()
 int32_t resize_test_opencv()
 {
     Mat img, dst_img;
-    const string file_name = "./lean.jpg";
+    const string file_name = "./lena.jpg";
+    img_info_t new_img, old_img;
 
     img = imread(file_name);
     cvtColor(img, dst_img, CV_BGR2GRAY);
     namedWindow("Display window", WINDOW_AUTOSIZE);
-    imshow("Display window", img);
+    imshow("Display window", dst_img);
+
+    old_img.width = dst_img.cols;
+
     cvWaitKey(0);
 
     return 0;
