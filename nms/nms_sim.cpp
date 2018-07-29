@@ -88,9 +88,9 @@ int main(int argc, char *argv[])
 
     // Test 3
     srcRects.push_back(cv::Rect(cv::Point(12, 30), cv::Point(76, 94)));
-    srcRects.push_back(cv::Rect(cv::Point(12, 36), cv::Point(76, 100)));
-    srcRects.push_back(cv::Rect(cv::Point(72, 36), cv::Point(200, 164)));
     srcRects.push_back(cv::Rect(cv::Point(84, 48), cv::Point(212, 176)));
+    srcRects.push_back(cv::Rect(cv::Point(72, 36), cv::Point(200, 164)));
+    srcRects.push_back(cv::Rect(cv::Point(12, 36), cv::Point(76, 100)));
 
     cv::Size size(0, 0);
     for (const auto &r : srcRects)

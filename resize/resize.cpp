@@ -2,9 +2,9 @@
 #include <iostream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/opencv.hpp>
-#include <string>
 #include <stdint.h>
 #include <stdio.h>
+#include <string>
 
 using namespace std;
 using namespace cv;
@@ -21,6 +21,7 @@ typedef int32_t (*resize_kernel_t)(img_info_t &, img_info_t &);
 const int32_t channel_num = 3;
 
 static int32_t resize_nearest(img_info_t &new_img, img_info_t &old_img);
+static int32_t resize_using_opencv(img_info_t &new_img, img_info_t &old_img);
 static int32_t convert_multi_channels(img_info_t &new_img,
                                       img_info_t &old_img,
                                       Mat origin_mat);
@@ -44,6 +45,16 @@ static int32_t resize_nearest(img_info_t &new_img, img_info_t &old_img)
                                  ((int32_t)(j * scale_h)) * old_width);
         }
     }
+
+    return 0;
+}
+
+static int32_t resize_using_opencv(img_info_t &new_img, img_info_t &old_img)
+{
+    Size dsize(new_img.width, new_img.height);
+    Mat input_img = Mat(old_img.height, old_img.width, CV_8UC1, old_img.img_addr);
+    Mat output_img = Mat(new_img.height, new_img.width, CV_8UC1, new_img.img_addr);
+    resize(input_img, output_img, dsize);
 
     return 0;
 }
@@ -90,7 +101,8 @@ int32_t resize_test_opencv()
     resize_kernel_t resize_kernel = 0;
     vector<cv::Mat> origin_mat, new_mat;
 
-    resize_kernel = resize_nearest;
+    //resize_kernel = resize_nearest;
+    resize_kernel = resize_using_opencv;
     img = imread(file_name);
     cvtColor(img, gray_img, CV_BGR2GRAY);
     //    split(img, g_img);
