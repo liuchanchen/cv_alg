@@ -1,0 +1,5 @@
+*.o
+*.s
+.vscode
+*.bin
+a.out
